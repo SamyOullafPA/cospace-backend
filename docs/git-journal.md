@@ -27,7 +27,9 @@ We can list the **local** branches that we have by running `git branch`, which w
 
 We can list the **remote** branches that we have by running `git branch -r`.
 
-We can merge a branch into our current branch by running `git merge BranchName`
+We can merge a branch into our current branch by running `git merge BranchName`.
+
+If you want to rename a branch before you pushed it, use the command `git branch -m NewBranchName`.
 
 ### Deleting a branch
 To delete a local branch, we can use `git branch -d BranchName`, however, this will only work if the branch has already been merged.
