@@ -37,3 +37,14 @@ To delete a local branch, we can use `git branch -d BranchName`, however, this w
 If the branch has not been merged already, we can force a delete by running `git branch -D BranchName`.
 
 Lastly, to delete a remote branch, we run `git push origin --delete BranchName`.
+
+## Git push
+Currently, our repository only exists locally on our hard drive. Although it is fully tracked locally, it is risky to only store it on our physical machine, also it doesn't allow for collaboration work easily. This is why we push our work onto Github.
+
+Initially, we need to connect to the remote by using `git remote add origin UrlHere`.
+
+It is important when connecting to Github, to rename the `master` branch to the `main` branch by running `git branch -M main`.
+
+Lastly, push and link the branch by running `git push -u origin main`, it is important to use the `-u` flag to initiate the link.
+
+We can verify if we have connected to the online git repository by running `git remote -v`, which should return the corresponding URL twice, for fetching and pushing.
