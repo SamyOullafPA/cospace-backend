@@ -30,15 +30,22 @@ class Task:
         if current_index < len(STATUSES) - 1:
             self.status = STATUSES[current_index + 1]
 
-
 class KanbanBoard:
     def __init__(self) -> None:
         self.tasks: List[Task] = []
 
+    def CheckDuplicates(self, title: str) -> bool:
+        for task in self.tasks:
+            if task.title == title:
+                return True
+
+        return False
+
     def add_task(self, title: str, description: str = "") -> Task:
-        task = Task(title=title.strip(), description=description.strip())
-        self.tasks.append(task)
-        return task
+        if (title == "" or self.CheckDuplicates(title)) == False:
+            task = Task(title=title.strip(), description=description.strip())
+            self.tasks.append(task)
+            return task
 
     def move_task(self, title: str, steps: int = 1) -> bool:
         for task in self.tasks:
