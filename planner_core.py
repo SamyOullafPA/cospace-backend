@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 STATE_FILE = Path(__file__).resolve().with_name("state.json")
 SPRINT_STATUSES = ["Planning", "Active", "Completed"]
 RETROSPECTIVE_CATEGORIES = ["Went Well", "To Improve", "Action Item"]
+TASK_STATUSES = ["To Do", "In Progress", "Done"]
 
 
 @dataclass
@@ -82,19 +83,40 @@ class RetrospectiveCard:
 class PlannerState:
     sprints: List[Sprint] = field(default_factory=list)
     retrospective_cards: List[RetrospectiveCard] = field(default_factory=list)
+    backlog_task_ids: List[str] = field(default_factory=list)
+    tasks: Dict[str, str] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "sprints": [sprint.to_dict() for sprint in self.sprints],
             "retrospective_cards": [card.to_dict() for card in self.retrospective_cards],
+            "backlog_task_ids": list(dict.fromkeys(self.backlog_task_ids)),
+            "tasks": dict(self.tasks),
         }
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "PlannerState":
-        return cls(
+        tasks_data = data.get("tasks", {})
+        if not isinstance(tasks_data, dict):
+            tasks_data = {}
+
+        state = cls(
             sprints=[Sprint.from_dict(item) for item in data.get("sprints", [])],
             retrospective_cards=[RetrospectiveCard.from_dict(item) for item in data.get("retrospective_cards", [])],
+            backlog_task_ids=[str(item).strip() for item in data.get("backlog_task_ids", []) if str(item).strip()],
+            tasks={str(task_id).strip(): str(status).strip() for task_id, status in tasks_data.items() if str(task_id).strip()},
         )
+
+        for sprint in state.sprints:
+            for task_id in sprint.task_ids:
+                if task_id not in state.tasks:
+                    state.tasks[task_id] = "To Do"
+
+        return state
+
+
+def _unique(values: List[str]) -> List[str]:
+    return list(dict.fromkeys(values))
 
 
 def load_state(file_path: Path = STATE_FILE) -> PlannerState:
@@ -141,6 +163,10 @@ def start_sprint(state: PlannerState, sprint_id: str) -> Sprint:
     if sprint.status != "Planning":
         raise ValueError(f"Sprint '{sprint_id}' cannot be started because it is not in Planning state.")
 
+    active_sprint = next((item for item in state.sprints if item.status == "Active" and item.id != sprint.id), None)
+    if active_sprint is not None:
+        raise ValueError(f"Cannot start sprint '{sprint_id}' because sprint '{active_sprint.id}' is already Active.")
+
     sprint.status = "Active"
     return sprint
 
@@ -154,6 +180,9 @@ def add_task_to_sprint(state: PlannerState, sprint_id: str, task_id: str) -> Spr
     if not task_id:
         raise ValueError("Task ID cannot be empty.")
 
+    state.tasks.setdefault(task_id, "To Do")
+    if task_id not in state.backlog_task_ids:
+        state.backlog_task_ids = [item for item in state.backlog_task_ids if item != task_id]
     if task_id not in sprint.task_ids:
         sprint.task_ids.append(task_id)
 
@@ -165,7 +194,19 @@ def complete_sprint(state: PlannerState, sprint_id: str) -> Sprint:
     if sprint.status != "Active":
         raise ValueError(f"Sprint '{sprint_id}' cannot be completed because it is not Active.")
 
+    remaining_task_ids: List[str] = []
+    for task_id in sprint.task_ids:
+        status = state.tasks.get(task_id, "To Do")
+        if status == "Done":
+            remaining_task_ids.append(task_id)
+        else:
+            state.tasks[task_id] = "To Do"
+            if task_id not in state.backlog_task_ids:
+                state.backlog_task_ids.append(task_id)
+
+    sprint.task_ids = remaining_task_ids
     sprint.status = "Completed"
+    state.backlog_task_ids = _unique(state.backlog_task_ids)
     return sprint
 
 
@@ -194,13 +235,12 @@ def add_retrospective_card(state: PlannerState, sprint_id: str, category: str, t
 def main() -> None:
     state = load_state()
 
-    print("Planner Core loaded from", STATE_FILE)
-    print(json.dumps(state.to_dict(), indent=2))
-
     sprint_one = create_sprint(state, "Sprint 1")
     start_sprint(state, sprint_one.id)
     add_task_to_sprint(state, sprint_one.id, "task-101")
     add_task_to_sprint(state, sprint_one.id, "task-102")
+    state.tasks["task-101"] = "Done"
+    state.tasks["task-102"] = "In Progress"
     complete_sprint(state, sprint_one.id)
     add_retrospective_card(state, sprint_one.id, "Went Well", "The team finished planning early and aligned on scope.")
     add_retrospective_card(state, sprint_one.id, "To Improve", "We should reduce context switching during implementation.")
@@ -210,7 +250,6 @@ def main() -> None:
     add_task_to_sprint(state, sprint_two.id, "task-201")
 
     save_state(state)
-    print("\nUpdated planner state saved to disk.")
     print(json.dumps(state.to_dict(), indent=2))
 
 
