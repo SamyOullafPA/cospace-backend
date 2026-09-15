@@ -52,6 +52,76 @@ def run_session(task_title: str) -> None:
     else:
         print("Discussion still recommended to align the team.")
 
+def is_ready_for_sprint(task: dict) -> bool:
+    """
+    Check if a task is ready to be pulled into a sprint by validating its Definition of Ready (DoR).
+    """
+    if not isinstance(task, dict):
+        return False
+
+    required_fields = {
+        "title": str,
+        "description": str,
+        "story_points": (int, float),
+        "blocked": bool,
+        "dor_checklist": dict,
+    }
+
+    for field_name, expected_type in required_fields.items():
+        if field_name not in task:
+            return False
+        if not isinstance(task[field_name], expected_type):
+            return False
+
+    if task["blocked"]:
+        return False
+
+    dor = task["dor_checklist"]
+
+    required_dor_checks = {
+        "clear_acceptance_criteria": bool,
+        "dependencies_identified": bool,
+        "estimate_confirmed": bool,
+    }
+
+    for check_name, expected_type in required_dor_checks.items():
+        if check_name not in dor:
+            return False
+        if not isinstance(dor[check_name], expected_type):
+            return False
+        if not dor[check_name]:
+            return False
+
+    return True
+
+
+def can_close_task(task: dict) -> bool:
+    """
+    Check if a task is ready to be closed by validating its Definition of Done (DoD).
+    """
+    if not isinstance(task, dict):
+        return False
+
+    if "dod_checklist" not in task or not isinstance(task["dod_checklist"], dict):
+        return False
+
+    dod = task["dod_checklist"]
+
+    required_dod_checks = {
+        "tested": bool,
+        "reviewed": bool,
+        "documented": bool,
+    }
+
+    for check_name, expected_type in required_dod_checks.items():
+        if check_name not in dod:
+            return False
+        if not isinstance(dod[check_name], expected_type):
+            return False
+        if not dod[check_name]:
+            return False
+
+    return True
 
 def main() -> None:
     print("Planning Poker CLI")
