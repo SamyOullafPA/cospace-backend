@@ -41,6 +41,15 @@ class KanbanBoard:
 
         return False
 
+    def CheckInProgress(self) -> bool:
+        Counter = 0
+
+        for task in self.tasks:
+            if task.status == "In Progress":
+                Counter += 1
+
+        return Counter
+
     def add_task(self, title: str, description: str = "") -> Task:
         if (title == "" or self.CheckDuplicates(title)) == False:
             task = Task(title=title.strip(), description=description.strip())
@@ -52,8 +61,16 @@ class KanbanBoard:
             if task.title.lower() == title.lower():
                 current_index = STATUSES.index(task.status)
                 new_index = min(current_index + steps, len(STATUSES) - 1)
-                task.status = STATUSES[new_index]
-                return True
+
+                if new_index == 1: # The index for In Progress state
+                    if self.CheckInProgress() <= 2:
+                        task.status = STATUSES[new_index]
+                        return True
+                    else:
+                        print("Too many tasks In Progress")
+
+                        return False
+
         return False
 
     def display(self) -> None:
