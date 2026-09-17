@@ -31,5 +31,7 @@ CREATE TABLE bookings(
     user_id INT,
     desk_id INT,
     booking_date date NOT NULL,
-    active boolean NOT NULL
+    active boolean NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (desk_id) REFERENCES desks(id) ON DELETE CASCADE
 );
