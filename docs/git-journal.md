@@ -60,3 +60,25 @@ However, a simpler way of doing this is by running `git pull`, we can fetch the 
 Sometimes when working collaboratively using git, it is possible that your local and online repository will **diverge**, this occurs when you make a change to your local repository and someone else makes a change to the online repository, and you are no longer in sync.
 
 A merge conflict occurs when you both have made changes to the same line of code, so git intercepts the merge and asks you which one to keep.
+
+## Git naming conventions
+When committing on git, it is important to use conventional naming to help other developers understand your codebase history better.
+
+We can have the following commit prefixes:
+- fix (patches a bug in your codebase)
+- feat (introduces a new feature)
+- build (changes to the build system or dependencies)
+- chore (general maintenance, like cleaning up)
+- docs (changes to documentation)
+- refactor (code restructuring)
+- perf (performance improvements)
+- test (testing)
+
+### Git semantic versioning
+Version numbers follow a syntax like so: `1.0.0`, this is represented as `MAJOR.MINOR.PATCH`
+
+A patch update is no new features, no breaking changes.
+
+A minor update is new functionality being added, but existing still works.
+
+A major update is a breaking change, where existing consumers may need to change their code.
