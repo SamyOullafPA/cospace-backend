@@ -48,3 +48,15 @@ It is important when connecting to Github, to rename the `master` branch to the 
 Lastly, push and link the branch by running `git push -u origin main`, it is important to use the `-u` flag to initiate the link.
 
 We can verify if we have connected to the online git repository by running `git remote -v`, which should return the corresponding URL twice, for fetching and pushing.
+
+## Git pull
+When others make changes to the codebase and push it onto the remote server, we need to be able to fetch these changes to keep them on our device if we want to contribute more changes to the project.
+
+We can fetch the changes by running `git fetch`, but this will not integrate the changes. To integrate them, we run `git merge`.
+
+However, a simpler way of doing this is by running `git pull`, we can fetch the changes and integrate them in one command.
+
+### Merge conflicts
+Sometimes when working collaboratively using git, it is possible that your local and online repository will **diverge**, this occurs when you make a change to your local repository and someone else makes a change to the online repository, and you are no longer in sync.
+
+A merge conflict occurs when you both have made changes to the same line of code, so git intercepts the merge and asks you which one to keep.
