@@ -1,7 +1,6 @@
 CREATE TABLE teams(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    department TEXT NOT NULL
+    name VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE users(
@@ -31,7 +30,7 @@ CREATE TABLE bookings(
     user_id INT,
     desk_id INT,
     booking_date date NOT NULL,
-    active boolean NOT NULL,
+    active boolean NOT NULL DEFAULT TRUE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (desk_id) REFERENCES desks(id) ON DELETE CASCADE
 );
