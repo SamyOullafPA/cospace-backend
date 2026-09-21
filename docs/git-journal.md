@@ -77,6 +77,6 @@ We can have the following commit prefixes:
 ### Git semantic versioning
 Version numbers follow a syntax like so: `1.0.0`, this is represented as `MAJOR.MINOR.PATCH`
 
--A patch update is no new features, no breaking changes.
--A minor update is new functionality being added, but existing still works.
--A major update is a breaking change, where existing consumers may need to change their code.
+- A patch update is no new features, no breaking changes.
+- A minor update is new functionality being added, but existing still works.
+- A major update is a breaking change, where existing consumers may need to change their code.
