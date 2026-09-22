@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import BookingRouter from "./routes/bookings.ts";
+import BookingRouter from "./routes/booking.routes.ts";
 
 const app = express();
 const PORT = 5000;
