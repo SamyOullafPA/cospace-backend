@@ -21,7 +21,8 @@ export class BookingService {
       throw new Error("Desk name must be at least 3 characters long");
     }
 
-    return this.bookingRepository.create(booking);
+    const created = this.bookingRepository.create(booking);
+    return created;
   }
 
   update(id: string, data: UpdateBookingInput): Booking | undefined {
