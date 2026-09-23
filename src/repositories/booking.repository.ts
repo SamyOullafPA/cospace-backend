@@ -30,9 +30,7 @@ export class BookingRepository {
       ...booking,
     };
 
-    console.log(`[repository] BookingRepository.create pushing new booking with id: ${newBooking.id}`);
     this.bookings.push(newBooking);
-    console.log(`[repository] BookingRepository.create returning booking`);
     return newBooking;
   }
 

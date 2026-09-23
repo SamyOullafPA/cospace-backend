@@ -1,15 +1,14 @@
 import { Router } from "express";
 import { BookingController } from "../controllers/booking.controller.ts";
+import authMiddleware from "../middleware/auth.ts"
+import validateRequiredFields from "../middleware/validate.ts"
 
 const router = Router();
 const bookingController = new BookingController();
 
 router.get("/", bookingController.findAll);
 router.get("/:id", bookingController.findById);
-router.post("/", (req, res) => {
-  console.log(`[route] POST /bookings received, forwarding to BookingController.create`);
-  bookingController.create(req, res);
-});
+router.post("/", authMiddleware, validateRequiredFields(['desk', 'floor']), bookingController.create);
 router.put("/:id", bookingController.update);
 router.patch("/:id", bookingController.update);
 router.delete("/:id", bookingController.delete);

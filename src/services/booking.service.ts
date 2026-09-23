@@ -17,13 +17,11 @@ export class BookingService {
   }
 
   create(booking: CreateBookingInput): Booking {
-    console.log(`[service] BookingService.create validating desk name length`);
     if (booking.desk.trim().length < 3) {
       throw new Error("Desk name must be at least 3 characters long");
     }
 
     const created = this.bookingRepository.create(booking);
-    console.log(`[service] BookingService.create returning booking to controller`);
     return created;
   }
 
