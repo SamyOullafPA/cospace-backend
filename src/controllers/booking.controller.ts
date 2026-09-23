@@ -27,8 +27,10 @@ export class BookingController {
   };
 
   create = (req: Request, res: Response): void => {
+    console.log(`[controller] BookingController.create called with body:`, req.body);
     try {
       const booking = this.bookingService.create(req.body);
+      console.log(`[controller] BookingController.create responding 201 with created booking`);
       res.status(201).json(booking);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to create booking";

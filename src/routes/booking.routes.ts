@@ -6,7 +6,10 @@ const bookingController = new BookingController();
 
 router.get("/", bookingController.findAll);
 router.get("/:id", bookingController.findById);
-router.post("/", bookingController.create);
+router.post("/", (req, res) => {
+  console.log(`[route] POST /bookings received, forwarding to BookingController.create`);
+  bookingController.create(req, res);
+});
 router.put("/:id", bookingController.update);
 router.patch("/:id", bookingController.update);
 router.delete("/:id", bookingController.delete);
