@@ -1,30 +1,23 @@
-export interface Booking {
-  id: string;
-  desk: string;
-  floor: string;
-  date: string;
-  active: boolean;
-}
+import { createBookingSchema, type Booking } from "../schemas/booking.schema.ts";
+import { type input } from "zod";
 
-export type CreateBookingInput = Omit<Booking, "id" | "active"> & {
-  active?: boolean;
-};
-
-export type UpdateBookingInput = Partial<Omit<Booking, "id">>;
+type StoredBooking = Booking & { id: string };
+export type CreateBookingInput = input<typeof createBookingSchema>;
+export type UpdateBookingInput = Partial<Booking>;
 
 export class BookingRepository {
-  private bookings: Booking[] = [];
+  private bookings: StoredBooking[] = [];
 
-  findAll(): Booking[] {
+  findAll(): StoredBooking[] {
     return this.bookings;
   }
 
-  findById(id: string): Booking | undefined {
+  findById(id: string): StoredBooking | undefined {
     return this.bookings.find((booking) => booking.id === id);
   }
 
-  create(booking: CreateBookingInput): Booking {
-    const newBooking: Booking = {
+  create(booking: CreateBookingInput): StoredBooking {
+    const newBooking: StoredBooking = {
       id: crypto.randomUUID(),
       active: true,
       ...booking,
@@ -34,7 +27,7 @@ export class BookingRepository {
     return newBooking;
   }
 
-  update(id: string, data: UpdateBookingInput): Booking | undefined {
+  update(id: string, data: UpdateBookingInput): StoredBooking | undefined {
     const booking = this.findById(id);
     if (!booking) {
       return undefined;
