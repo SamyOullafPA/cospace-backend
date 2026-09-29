@@ -1,30 +1,31 @@
-export interface Booking {
-  id: string;
-  desk: string;
-  floor: string;
-  date: string;
-  active: boolean;
-}
+import { createBookingSchema, type Booking } from "../schemas/booking.schema.ts";
+import { type input } from "zod";
 
-export type CreateBookingInput = Omit<Booking, "id" | "active"> & {
-  active?: boolean;
-};
-
-export type UpdateBookingInput = Partial<Omit<Booking, "id">>;
+type StoredBooking = Booking & { id: string };
+export type CreateBookingInput = input<typeof createBookingSchema>;
+export type UpdateBookingInput = Partial<Booking>;
 
 export class BookingRepository {
-  private bookings: Booking[] = [];
+  private bookings: StoredBooking[] = [];
 
-  findAll(): Booking[] {
+  findAll(): StoredBooking[] {
     return this.bookings;
   }
 
-  findById(id: string): Booking | undefined {
+  findPaginated(skip: number, limit: number): StoredBooking[] {
+    return this.bookings.slice(skip, skip + limit);
+  }
+
+  count(): number {
+    return this.bookings.length;
+  }
+
+  findById(id: string): StoredBooking | undefined {
     return this.bookings.find((booking) => booking.id === id);
   }
 
-  create(booking: CreateBookingInput): Booking {
-    const newBooking: Booking = {
+  create(booking: CreateBookingInput): StoredBooking {
+    const newBooking: StoredBooking = {
       id: crypto.randomUUID(),
       active: true,
       ...booking,
@@ -34,7 +35,7 @@ export class BookingRepository {
     return newBooking;
   }
 
-  update(id: string, data: UpdateBookingInput): Booking | undefined {
+  update(id: string, data: UpdateBookingInput): StoredBooking | undefined {
     const booking = this.findById(id);
     if (!booking) {
       return undefined;
@@ -52,5 +53,41 @@ export class BookingRepository {
 
     this.bookings.splice(index, 1);
     return true;
+  }
+
+  // Function designed to fake data for dev purposes.
+  populateFakeData(): StoredBooking[] {
+    if (this.bookings.length >= 0)
+    {
+      const newBooking1: StoredBooking = {
+        id: crypto.randomUUID(),
+        active: true,
+        desk: "Desk F3",
+        floor: "6",
+        date: "2026-09-29"
+      };
+
+      const newBooking2: StoredBooking = {
+        id: crypto.randomUUID(),
+        active: true,
+        desk: "Desk D1",
+        floor: "6",
+        date: "2026-09-29"
+      };
+
+      const newBooking3: StoredBooking = {
+        id: crypto.randomUUID(),
+        active: true,
+        desk: "Desk G2",
+        floor: "7",
+        date: "2026-09-30"
+      };
+
+      this.bookings.push(newBooking1, newBooking2, newBooking3);
+
+      return this.bookings;
+    }
+    
+    return []
   }
 }
