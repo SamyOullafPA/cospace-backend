@@ -12,6 +12,14 @@ export class BookingRepository {
     return this.bookings;
   }
 
+  findPaginated(skip: number, limit: number): StoredBooking[] {
+    return this.bookings.slice(skip, skip + limit);
+  }
+
+  count(): number {
+    return this.bookings.length;
+  }
+
   findById(id: string): StoredBooking | undefined {
     return this.bookings.find((booking) => booking.id === id);
   }
@@ -49,7 +57,7 @@ export class BookingRepository {
 
   // Function designed to fake data for dev purposes.
   populateFakeData(): StoredBooking[] {
-    if (this.bookings.length === 0)
+    if (this.bookings.length >= 0)
     {
       const newBooking1: StoredBooking = {
         id: crypto.randomUUID(),

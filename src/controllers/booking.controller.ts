@@ -1,11 +1,28 @@
 import type { Request, Response } from "express";
-import { BookingService } from "../services/booking.service.ts";
+import { BookingService, BookingNotFoundError } from "../services/booking.service.ts";
+
+const MAX_LIMIT = 50;
 
 export class BookingController {
   constructor(private readonly bookingService: BookingService = new BookingService()) {}
 
   findAll = (req: Request, res: Response): void => {
-    const bookings = this.bookingService.findAll();
+    const requestedPage = Number(req.query.page ?? 1);
+    const requestedLimit = Number(req.query.limit ?? 10);
+
+    if (!Number.isFinite(requestedPage) || !Number.isFinite(requestedLimit)) {
+      res.status(400).json({
+        status: "fail",
+        message: "page and limit must be numbers",
+        errors: [],
+      });
+      return;
+    }
+
+    const safePage = Math.max(Math.trunc(requestedPage), 1);
+    const safeLimit = Math.min(Math.max(Math.trunc(requestedLimit), 1), MAX_LIMIT);
+
+    const bookings = this.bookingService.getPaginatedShifts(safePage, safeLimit);
     res.status(200).json(bookings);
   };
 
@@ -45,14 +62,13 @@ export class BookingController {
 
     try {
       const booking = this.bookingService.update(id, req.body);
-
-      if (!booking) {
-        res.status(404).json({ status: "fail", message: "Booking not found", errors: [] });
+      res.status(200).json(booking);
+    } catch (error) {
+      if (error instanceof BookingNotFoundError) {
+        res.status(404).json({ status: "fail", message: error.message, errors: [] });
         return;
       }
 
-      res.status(200).json(booking);
-    } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to update booking";
       res.status(400).json({ status: "fail", message, errors: [] });
     }
@@ -65,14 +81,18 @@ export class BookingController {
       return;
     }
 
-    const deleted = this.bookingService.delete(id);
+    try {
+      this.bookingService.delete(id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof BookingNotFoundError) {
+        res.status(404).json({ status: "fail", message: error.message, errors: [] });
+        return;
+      }
 
-    if (!deleted) {
-      res.status(404).json({ status: "fail", message: "Booking not found", errors: [] });
-      return;
+      const message = error instanceof Error ? error.message : "Unable to delete booking";
+      res.status(400).json({ status: "fail", message, errors: [] });
     }
-
-    res.status(204).send();
   };
 
   populateFakeData = (req: Request<{ id : string}>, res: Response): void => {

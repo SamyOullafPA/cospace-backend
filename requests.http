@@ -1,0 +1,5 @@
+###
+POST http://localhost:5000/bookings/populate_data
+
+###
+GET http://localhost:5000/bookings?page=2&limit=2
