@@ -1,107 +1,94 @@
-import type { Request, Response } from "express";
-import { BookingService, BookingNotFoundError } from "../services/booking.service.ts";
+import type { NextFunction, Request, Response } from "express";
+import { BookingService } from "../services/booking.service.ts";
+import { BadRequestError } from "../errors/badRequestError.ts";
+import { NotFoundError } from "../errors/notFoundError.ts";
+import { HttpStatus } from "../constants/httpStatus.ts";
 
 const MAX_LIMIT = 50;
 
 export class BookingController {
   constructor(private readonly bookingService: BookingService = new BookingService()) {}
 
-  findAll = (req: Request, res: Response): void => {
-    const requestedPage = Number(req.query.page ?? 1);
-    const requestedLimit = Number(req.query.limit ?? 10);
+  findAll = (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      const requestedPage = Number(req.query.page ?? 1);
+      const requestedLimit = Number(req.query.limit ?? 10);
 
-    if (!Number.isFinite(requestedPage) || !Number.isFinite(requestedLimit)) {
-      res.status(400).json({
-        status: "fail",
-        message: "page and limit must be numbers",
-        errors: [],
-      });
-      return;
+      if (!Number.isFinite(requestedPage) || !Number.isFinite(requestedLimit)) {
+        throw new BadRequestError("page and limit must be numbers");
+      }
+
+      const safePage = Math.max(Math.trunc(requestedPage), 1);
+      const safeLimit = Math.min(Math.max(Math.trunc(requestedLimit), 1), MAX_LIMIT);
+
+      const bookings = this.bookingService.getPaginatedShifts(safePage, safeLimit);
+      res.status(HttpStatus.OK).json(bookings);
+    } catch (error) {
+      next(error);
     }
-
-    const safePage = Math.max(Math.trunc(requestedPage), 1);
-    const safeLimit = Math.min(Math.max(Math.trunc(requestedLimit), 1), MAX_LIMIT);
-
-    const bookings = this.bookingService.getPaginatedShifts(safePage, safeLimit);
-    res.status(200).json(bookings);
   };
 
-  findById = (req: Request<{ id: string }>, res: Response): void => {
-    const { id } = req.params;
-    if (!id) {
-      res.status(400).json({ status: "fail", message: "Booking id is required", errors: [] });
-      return;
+  findById = (req: Request<{ id: string }>, res: Response, next: NextFunction): void => {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        throw new BadRequestError("Booking id is required");
+      }
+
+      const booking = this.bookingService.findById(id);
+      if (!booking) {
+        throw new NotFoundError("Booking not found");
+      }
+
+      res.status(HttpStatus.OK).json(booking);
+    } catch (error) {
+      next(error);
     }
-
-    const booking = this.bookingService.findById(id);
-
-    if (!booking) {
-      res.status(404).json({ status: "fail", message: "Booking not found", errors: [] });
-      return;
-    }
-
-    res.status(200).json(booking);
   };
 
-  create = (req: Request, res: Response): void => {
+  create = (req: Request, res: Response, next: NextFunction): void => {
     try {
       const booking = this.bookingService.create(req.body);
-      res.status(201).json(booking);
+      res.status(HttpStatus.CREATED).json(booking);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to create booking";
-      res.status(400).json({ status: "fail", message, errors: [] });
+      next(error);
     }
   };
 
-  update = (req: Request<{ id: string }>, res: Response): void => {
-    const { id } = req.params;
-    if (!id) {
-      res.status(400).json({ status: "fail", message: "Booking id is required", errors: [] });
-      return;
-    }
-
+  update = (req: Request<{ id: string }>, res: Response, next: NextFunction): void => {
     try {
+      const { id } = req.params;
+      if (!id) {
+        throw new BadRequestError("Booking id is required");
+      }
+
       const booking = this.bookingService.update(id, req.body);
-      res.status(200).json(booking);
+      res.status(HttpStatus.OK).json(booking);
     } catch (error) {
-      if (error instanceof BookingNotFoundError) {
-        res.status(404).json({ status: "fail", message: error.message, errors: [] });
-        return;
-      }
-
-      const message = error instanceof Error ? error.message : "Unable to update booking";
-      res.status(400).json({ status: "fail", message, errors: [] });
+      next(error);
     }
   };
 
-  delete = (req: Request<{ id: string }>, res: Response): void => {
-    const { id } = req.params;
-    if (!id) {
-      res.status(400).json({ status: "fail", message: "Booking id is required", errors: [] });
-      return;
-    }
-
+  delete = (req: Request<{ id: string }>, res: Response, next: NextFunction): void => {
     try {
-      this.bookingService.delete(id);
-      res.status(204).send();
-    } catch (error) {
-      if (error instanceof BookingNotFoundError) {
-        res.status(404).json({ status: "fail", message: error.message, errors: [] });
-        return;
+      const { id } = req.params;
+      if (!id) {
+        throw new BadRequestError("Booking id is required");
       }
 
-      const message = error instanceof Error ? error.message : "Unable to delete booking";
-      res.status(400).json({ status: "fail", message, errors: [] });
+      this.bookingService.delete(id);
+      res.status(HttpStatus.NO_CONTENT).send();
+    } catch (error) {
+      next(error);
     }
   };
 
-  populateFakeData = (req: Request<{ id : string}>, res: Response): void => {
+  populateFakeData = (_req: Request, res: Response, next: NextFunction): void => {
     try {
       const bookings = this.bookingService.populateFakeData();
-      res.status(201).json(bookings);
+      res.status(HttpStatus.CREATED).json(bookings);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to create booking";
-      res.status(400).json({ status: "fail", message, errors: [] });
+      next(error);
     }
-  }
+  };
 }
