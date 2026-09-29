@@ -18,5 +18,6 @@ router.post(
 router.put("/:id", bookingController.update);
 router.patch("/:id", bookingController.update);
 router.delete("/:id", bookingController.delete);
+router.post("/populate_data", bookingController.populateFakeData)
 
 export default router;

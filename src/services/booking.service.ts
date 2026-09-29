@@ -34,4 +34,8 @@ export class BookingService {
   delete(id: string): boolean {
     return this.bookingRepository.delete(id);
   }
+
+  populateFakeData(): StoredBooking[] {
+    return this.bookingRepository.populateFakeData();
+  }
 }

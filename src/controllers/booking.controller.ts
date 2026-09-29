@@ -74,4 +74,14 @@ export class BookingController {
 
     res.status(204).send();
   };
+
+  populateFakeData = (req: Request<{ id : string}>, res: Response): void => {
+    try {
+      const bookings = this.bookingService.populateFakeData();
+      res.status(201).json(bookings);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to create booking";
+      res.status(400).json({ status: "fail", message, errors: [] });
+    }
+  }
 }
