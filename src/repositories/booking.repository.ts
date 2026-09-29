@@ -49,32 +49,37 @@ export class BookingRepository {
 
   // Function designed to fake data for dev purposes.
   populateFakeData(): StoredBooking[] {
-    const newBooking1: StoredBooking = {
-      id: crypto.randomUUID(),
-      active: true,
-      desk: "Desk F3",
-      floor: "6",
-      date: "2026-09-29"
-    };
+    if (this.bookings.length === 0)
+    {
+      const newBooking1: StoredBooking = {
+        id: crypto.randomUUID(),
+        active: true,
+        desk: "Desk F3",
+        floor: "6",
+        date: "2026-09-29"
+      };
 
-    const newBooking2: StoredBooking = {
-      id: crypto.randomUUID(),
-      active: true,
-      desk: "Desk D1",
-      floor: "6",
-      date: "2026-09-29"
-    };
+      const newBooking2: StoredBooking = {
+        id: crypto.randomUUID(),
+        active: true,
+        desk: "Desk D1",
+        floor: "6",
+        date: "2026-09-29"
+      };
 
-    const newBooking3: StoredBooking = {
-      id: crypto.randomUUID(),
-      active: true,
-      desk: "Desk G2",
-      floor: "7",
-      date: "2026-09-30"
-    };
+      const newBooking3: StoredBooking = {
+        id: crypto.randomUUID(),
+        active: true,
+        desk: "Desk G2",
+        floor: "7",
+        date: "2026-09-30"
+      };
 
-    this.bookings.push(newBooking1, newBooking2, newBooking3);
+      this.bookings.push(newBooking1, newBooking2, newBooking3);
 
-    return this.bookings;
+      return this.bookings;
+    }
+    
+    return []
   }
 }
