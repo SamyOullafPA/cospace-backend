@@ -4,15 +4,10 @@ import {
   type CreateBookingInput,
   type UpdateBookingInput,
 } from "../repositories/booking.repository.ts";
+import { NotFoundError } from "../errors/notFoundError.ts";
+import { BadRequestError } from "../errors/badRequestError.ts";
 
 type StoredBooking = Booking & { id: string };
-
-export class BookingNotFoundError extends Error {
-  constructor(public readonly id: string) {
-    super("Booking not found");
-    this.name = "BookingNotFoundError";
-  }
-}
 
 type PaginatedBookings = {
   data: StoredBooking[];
@@ -51,7 +46,7 @@ export class BookingService {
 
   create(booking: CreateBookingInput): StoredBooking {
     if (booking.desk.trim().length < 3) {
-      throw new Error("Desk name must be at least 3 characters long");
+      throw new BadRequestError("Desk name must be at least 3 characters long");
     }
 
     const created = this.bookingRepository.create(booking);
@@ -61,7 +56,7 @@ export class BookingService {
   update(id: string, data: UpdateBookingInput): StoredBooking {
     const updated = this.bookingRepository.update(id, data);
     if (!updated) {
-      throw new BookingNotFoundError(id);
+      throw new NotFoundError("Booking not found");
     }
 
     return updated;
@@ -70,7 +65,7 @@ export class BookingService {
   delete(id: string): void {
     const deleted = this.bookingRepository.delete(id);
     if (!deleted) {
-      throw new BookingNotFoundError(id);
+      throw new NotFoundError("Booking not found");
     }
   }
 
