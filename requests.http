@@ -3,3 +3,12 @@ POST http://localhost:5000/bookings/populate_data
 
 ###
 GET http://localhost:5000/bookings?page=2&limit=2
+
+### 
+GET http://localhost:5000/boom-app-error
+
+###
+GET http://localhost:5000/boom-unexpected
+
+###
+GET http://localhost:5000/generic-error
