@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import cors from "cors";
 import BookingRouter from "./routes/booking.routes.ts";
 import LoggerFunction from "./middleware/logger.ts";
 import errorHandler from "./middleware/errorHandler.ts";
@@ -8,6 +9,7 @@ const app = express();
 const PORT = 5000;
 
 app.use(LoggerFunction);
+app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
 
 app.get("/", (req: Request, res: Response) => {
